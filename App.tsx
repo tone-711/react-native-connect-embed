@@ -10,36 +10,55 @@ import {
   ThirdwebProvider,
   trustWallet,
   useAddress,
+  useContract,
   walletConnect,
+  smartWallet,
 } from '@thirdweb-dev/react-native';
 import React from 'react';
-import {TW_CLIENT_ID} from '@env';
+import {TW_CLIENT_ID, TW_WALLET_FACTORY, SEVEN_COIN} from '@env';
+import {BinanceTestnet} from '@thirdweb-dev/chains';
 
 const App = () => {
   return (
     <ThirdwebProvider
-      activeChain="mumbai"
+      activeChain={BinanceTestnet}
       clientId={TW_CLIENT_ID}
       supportedWallets={[
-        metamaskWallet({
-          recommended: true,
-        }),
-        rainbowWallet(),
-        walletConnect({
-          recommended: true,
-        }),
-        embeddedWallet({
-          auth: {
-            // you need to enable EmbeddedWallets under your API Key in your thirdweb dashboard:
-            // https://thirdweb.com/dashboard/settings/api-keys
-            options: ['email', 'google'],
-            // you need to add this deeplink in your allowed `Redirect URIs` under your API Key in your thirdweb dashboard:
-            // https://thirdweb.com/dashboard/settings/api-keys
-            redirectUrl: 'rnstarter://',
+        // metamaskWallet({
+        //   recommended: true,
+        // }),
+        // rainbowWallet(),
+        // walletConnect({
+        //   recommended: true,
+        // }),
+        smartWallet(
+          embeddedWallet({
+            auth: {
+              // you need to enable EmbeddedWallets under your API Key in your thirdweb dashboard:
+              // https://thirdweb.com/dashboard/settings/api-keys
+              options: ['email', 'google'],
+              // you need to add this deeplink in your allowed `Redirect URIs` under your API Key in your thirdweb dashboard:
+              // https://thirdweb.com/dashboard/settings/api-keys
+              redirectUrl: 'rnstarter://',
+            },
+          }),
+          {
+            factoryAddress: TW_WALLET_FACTORY,
+            gasless: true,
           },
-        }),
-        trustWallet(),
-        localWallet(),
+        ),
+        // embeddedWallet({
+        //   auth: {
+        //     // you need to enable EmbeddedWallets under your API Key in your thirdweb dashboard:
+        //     // https://thirdweb.com/dashboard/settings/api-keys
+        //     options: ['email', 'google'],
+        //     // you need to add this deeplink in your allowed `Redirect URIs` under your API Key in your thirdweb dashboard:
+        //     // https://thirdweb.com/dashboard/settings/api-keys
+        //     redirectUrl: 'rnstarter://',
+        //   },
+        // }),
+        // trustWallet(),
+        // localWallet(),
       ]}>
       <AppInner />
     </ThirdwebProvider>
@@ -58,7 +77,21 @@ const AppInner = () => {
       {address ? (
         <Box gap="md">
           <Text textAlign="center">Welcome!</Text>
-          <ConnectWallet />
+          <ConnectWallet
+            supportedTokens={{
+              [BinanceTestnet.chainId]: [
+                {
+                  address: SEVEN_COIN, // token contract address
+                  name: 'SevenCoin',
+                  symbol: '7C',
+                  icon: 'https://assets.coingecko.com/coins/images/9956/small/Badge_Dai.png?1687143508',
+                },
+              ],
+            }}
+            displayBalanceToken={{
+              [BinanceTestnet.chainId]: SEVEN_COIN, // show SEVENCOIN token balance when connected to Base mainnet
+            }}
+          />
         </Box>
       ) : (
         <Box gap="md">
